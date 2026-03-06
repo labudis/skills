@@ -97,10 +97,13 @@ xdg-open ~/Desktop/<mockup-name>.html  # Linux
 
 ### Quick deploy: GitHub Pages
 
-1. **Check for a deploy repo** under the user's account (e.g., `<user>/mockups`). Create if needed:
+1. **Check for a deploy repo** under the user's account (e.g., `<user>/mockups`). Create if needed. Ask the user whether the repo should be **public or private** before creating it.
    ```bash
    gh repo create <user>/mockups --public --clone
+   # or --private if the user prefers
    ```
+
+   > **Private repo note:** GitHub Pages requires a paid plan (Pro, Team, or Enterprise) for private repos. If the user picks private, warn them that Pages won't work on a free plan and offer alternatives (make it public, share the HTML file directly, or preview locally).
 
 2. **Enable GitHub Pages** with the Actions workflow approach:
    ```bash
@@ -140,7 +143,14 @@ xdg-open ~/Desktop/<mockup-name>.html  # Linux
      deployment-status/index.html
    ```
 
-5. **Return the live URL:**
+5. **Landing page for multi-mockup repos.** When the repo holds more than one mockup, create a root `index.html` that links to each one:
+   ```html
+   <a href="sessions-sidebar/">Sessions Sidebar</a>
+   <a href="deployment-status/">Deployment Status</a>
+   ```
+   Keep the landing page minimal. Match the same dark theme used in the mockups.
+
+6. **Return the live URL:**
    ```
    https://<user>.github.io/mockups/
    ```
