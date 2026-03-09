@@ -120,42 +120,16 @@ Only start this phase when the user explicitly asks to deploy, push, or share.
    ```bash
    # Check if Pages exists
    gh api repos/<owner>/<repo>/pages --jq '.html_url'
-   # If not, enable it
-   gh api repos/<owner>/<repo>/pages -X POST -f build_type=workflow
+   # If not, enable it with source set to the main branch
+   gh api repos/<owner>/<repo>/pages -X POST -f source='{"branch":"main","path":"/"}'
    ```
 
-2. **Add the Pages deploy workflow** if it doesn't exist (`.github/workflows/pages.yml`):
-   ```yaml
-   name: Deploy to GitHub Pages
-   on:
-     push:
-       branches: [main]
-   permissions:
-     contents: read
-     pages: write
-     id-token: write
-   jobs:
-     deploy:
-       runs-on: ubuntu-latest
-       environment:
-         name: github-pages
-         url: ${{ steps.deployment.outputs.page_url }}
-       steps:
-         - uses: actions/checkout@v4
-         - uses: actions/configure-pages@v4
-         - uses: actions/upload-pages-artifact@v3
-           with:
-             path: '.'
-         - id: deployment
-           uses: actions/deploy-pages@v4
-   ```
+2. **Add a README.md** in the mockup directory with a summary of the states/options.
 
-3. **Add a README.md** in the mockup directory with a summary of the states/options.
-
-4. **Create branch, commit, push, PR, and merge** in one flow:
+3. **Create branch, commit, push, PR, and merge** in one flow:
    ```bash
    git checkout -b <user>/mockup-<feature-name>
-   git add docs/mockups/<feature-name>/ .github/workflows/pages.yml
+   git add docs/mockups/<feature-name>/
    git commit -m "Add <feature-name> mockup"
    git push origin <user>/mockup-<feature-name>
    gh pr create --title "<Feature> mockup" --body "..."
@@ -165,7 +139,7 @@ Only start this phase when the user explicitly asks to deploy, push, or share.
 
    The merge to main is required for Pages to deploy. Do not leave the PR open.
 
-5. **Open the live URL** in the browser after merge:
+4. **Open the live URL** in the browser after merge:
    ```bash
    # Get the Pages URL
    PAGES_URL=$(gh api repos/<owner>/<repo>/pages --jq '.html_url')
