@@ -16,6 +16,17 @@ End-to-end workflow for creating, iterating, and sharing interactive HTML mockup
 
 ## Phase 1: Generate
 
+### Ask where this mockup belongs
+
+Before creating the file, ask the user which repo to work in. The mockup file lives in the repo's local clone from the start - no copying later.
+
+1. Ask: "Which repo should this mockup live in?" (e.g., `github/triage-agent`, `labudis/ideas`)
+2. Find the local clone (check `~/GitHub/<org>/<repo>` or `~/GitHub/<repo>`)
+3. Look for existing folder conventions: `docs/mockups/`, `considerations/`, `designs/`, `proposals/`. If none exist, use `docs/mockups/`.
+4. Create the mockup at `<repo>/docs/mockups/<feature-name>/mockup.html`
+
+### Create the mockup
+
 Create a **single self-contained HTML file** with all CSS inline. No external dependencies, no build steps.
 
 ### Style guide
@@ -78,39 +89,42 @@ Key rules:
 
 ### Preview locally
 
+After creating the file, always open it in the browser automatically:
+
 ```bash
-open ~/Desktop/<mockup-name>.html   # macOS
-xdg-open ~/Desktop/<mockup-name>.html  # Linux
+open <repo-path>/docs/mockups/<feature-name>/mockup.html   # macOS
+xdg-open <repo-path>/docs/mockups/<feature-name>/mockup.html  # Linux
 ```
 
 ## Phase 2: Iterate
 
+All changes stay local. Do not push to the remote until the user explicitly asks to deploy or push.
+
 1. Edit the HTML file based on user feedback
-2. Reopen in browser after each change
+2. **Always re-open in browser after each change** so the user can see updates immediately
 3. Common iteration patterns:
    - Adding/removing/reordering options
    - Adding pros/cons narrative below each option
    - Tweaking layout, spacing, colors
    - Fixing visual bugs reported via screenshots
 
+**Important:** Do not `git commit`, `git push`, or create PRs during this phase. The user will tell you when they are ready.
+
 ## Phase 3: Deploy for sharing
 
-### Quick deploy: GitHub Pages
+Only start this phase when the user explicitly asks to deploy, push, or share.
 
-1. **Check for a deploy repo** under the user's account (e.g., `<user>/mockups`). Create if needed. Ask the user whether the repo should be **public or private** before creating it.
+### Steps
+
+1. **Ensure GitHub Pages is enabled** on the target repo:
    ```bash
-   gh repo create <user>/mockups --public --clone
-   # or --private if the user prefers
+   # Check if Pages exists
+   gh api repos/<owner>/<repo>/pages --jq '.html_url'
+   # If not, enable it
+   gh api repos/<owner>/<repo>/pages -X POST -f build_type=workflow
    ```
 
-   > **Private repo note:** GitHub Pages requires a paid plan (Pro, Team, or Enterprise) for private repos. If the user picks private, warn them that Pages won't work on a free plan and offer alternatives (make it public, share the HTML file directly, or preview locally).
-
-2. **Enable GitHub Pages** with the Actions workflow approach:
-   ```bash
-   gh api repos/<user>/mockups/pages -X POST -f build_type=workflow
-   ```
-
-3. **Add the Pages deploy workflow** (`.github/workflows/pages.yml`):
+2. **Add the Pages deploy workflow** if it doesn't exist (`.github/workflows/pages.yml`):
    ```yaml
    name: Deploy to GitHub Pages
    on:
@@ -136,40 +150,34 @@ xdg-open ~/Desktop/<mockup-name>.html  # Linux
            uses: actions/deploy-pages@v4
    ```
 
-4. **Copy the file, commit, push.** For a single mockup use `index.html`. For multiple, use subdirectories:
-   ```
-   mockups/
-     sessions-sidebar/index.html
-     deployment-status/index.html
+3. **Add a README.md** in the mockup directory with a summary of the states/options.
+
+4. **Create branch, commit, push, PR, and merge** in one flow:
+   ```bash
+   git checkout -b <user>/mockup-<feature-name>
+   git add docs/mockups/<feature-name>/ .github/workflows/pages.yml
+   git commit -m "Add <feature-name> mockup"
+   git push origin <user>/mockup-<feature-name>
+   gh pr create --title "<Feature> mockup" --body "..."
+   # Wait for checks, then merge
+   gh pr merge <number> --squash --delete-branch
    ```
 
-5. **Landing page for multi-mockup repos.** When the repo holds more than one mockup, create a root `index.html` that links to each one:
-   ```html
-   <a href="sessions-sidebar/">Sessions Sidebar</a>
-   <a href="deployment-status/">Deployment Status</a>
-   ```
-   Keep the landing page minimal. Match the same dark theme used in the mockups.
+   The merge to main is required for Pages to deploy. Do not leave the PR open.
 
-6. **Return the live URL:**
+5. **Open the live URL** in the browser after merge:
+   ```bash
+   # Get the Pages URL
+   PAGES_URL=$(gh api repos/<owner>/<repo>/pages --jq '.html_url')
+   open "${PAGES_URL}docs/mockups/<feature-name>/mockup.html"
    ```
-   https://<user>.github.io/mockups/
-   ```
-
-### Team repo: PR for project context
-
-1. Find the right folder convention in the repo. Look for existing directories like `considerations/`, `docs/mockups/`, `designs/`, `proposals/`, or `product/`. If none exist, use `docs/mockups/`.
-2. Use a feature-scoped subdirectory with a `README.md`:
-   ```
-   docs/mockups/feature-name/
-     mockup.html
-     README.md
-   ```
-3. Open a PR with a summary table of options and a link to the live Pages version
-4. Always deploy to Pages first so the PR body can link to the live URL
 
 ## Guidelines
 
 - Single self-contained HTML file. No build tools, no npm, no frameworks.
-- Clean up temp directories (`/tmp/...`) after deployment.
-- When updating, push to both the Pages repo and team repo.
+- Save the mockup directly in the target repo's local clone from the start.
+- Do not maintain two copies of the mockup (e.g., Desktop + repo). One file, one location.
+- Do not push changes during iteration. Local only until the user says to deploy.
+- Always auto-open the local file in browser during iteration.
+- Always auto-open the live Pages URL after deploy.
 - Use descriptive file and folder names (e.g., `sessions-sidebar`, not `mockup-1`).
