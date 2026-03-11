@@ -1,6 +1,6 @@
 ---
 name: mockup-prototype
-description: 'Generate interactive HTML mockups from a description, iterate on them, and deploy to GitHub Pages for sharing. Use this skill when the user wants to create a mockup, prototype, UI exploration, or design comparison, or when they want to deploy or share one.'
+description: 'Generate interactive HTML mockups from a description, iterate on them, and deploy to GitHub Pages or Vercel for sharing. Use this skill when the user wants to create a mockup, prototype, UI exploration, or design comparison, or when they want to deploy or share one.'
 ---
 
 # Mockup Prototype
@@ -114,13 +114,21 @@ All changes stay local. Do not push to the remote until the user explicitly asks
 
 Only start this phase when the user explicitly asks to deploy, push, or share.
 
-### Steps
+### Choose a deployment target
+
+Ask the user where to deploy:
+
+- **GitHub Pages** (default): deploys via the repo's Pages site. Requires merging to main.
+- **Vercel**: deploys instantly via `vercel deploy --prod`. No PR or merge required.
+
+If the user has already stated a preference (e.g., "deploy to Vercel"), skip the prompt.
+
+### Option A: GitHub Pages
 
 1. **Ensure GitHub Pages is enabled** on the target repo:
    ```bash
-   # Check if Pages exists
    gh api repos/<owner>/<repo>/pages --jq '.html_url'
-   # If not, enable it with source set to the main branch
+   # If not enabled:
    gh api repos/<owner>/<repo>/pages -X POST -f source='{"branch":"main","path":"/"}'
    ```
 
@@ -141,10 +149,38 @@ Only start this phase when the user explicitly asks to deploy, push, or share.
 
 4. **Open the live URL** in the browser after merge:
    ```bash
-   # Get the Pages URL
    PAGES_URL=$(gh api repos/<owner>/<repo>/pages --jq '.html_url')
    open "${PAGES_URL}docs/mockups/<feature-name>/mockup.html"
    ```
+
+### Option B: Vercel
+
+1. **Ensure the Vercel CLI is installed and authenticated:**
+   ```bash
+   vercel --version || npm install -g vercel
+   vercel whoami  # confirm logged in
+   ```
+
+2. **Prepare the deploy directory.** Vercel serves `index.html` by default. Copy the mockup file so it works at the root URL:
+   ```bash
+   cp <repo-path>/docs/mockups/<feature-name>/mockup.html \
+      <repo-path>/docs/mockups/<feature-name>/index.html
+   ```
+
+3. **Deploy from the mockup directory:**
+   ```bash
+   cd <repo-path>/docs/mockups/<feature-name>
+   vercel deploy --prod --yes
+   ```
+
+4. **Clean up the temporary index.html** (keep `mockup.html` as the source of truth):
+   ```bash
+   rm <repo-path>/docs/mockups/<feature-name>/index.html
+   ```
+
+5. **Open the live URL** in the browser. Vercel prints the production URL and alias on deploy. Open the alias URL (e.g., `https://<project>.vercel.app`).
+
+6. **Optionally commit and push** the mockup to the repo for project history. This is separate from the Vercel deploy and follows the same branch/PR/merge flow as GitHub Pages. Only do this if the user asks.
 
 ## Guidelines
 
