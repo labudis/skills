@@ -114,6 +114,14 @@ All changes stay local. Do not push to the remote until the user explicitly asks
 
 Only start this phase when the user explicitly asks to deploy, push, or share.
 
+### Confirm public visibility
+
+Before deploying, remind the user:
+
+> This will deploy the mockup to a **public URL**. Confirm the content is safe to share externally (see the Security section above).
+
+If the user has not acknowledged this, ask for confirmation before proceeding.
+
 ### Choose a deployment target
 
 Ask the user where to deploy:
@@ -181,6 +189,28 @@ If the user has already stated a preference (e.g., "deploy to Vercel"), skip the
 5. **Open the live URL** in the browser. Vercel prints the production URL and alias on deploy. Open the alias URL (e.g., `https://<project>.vercel.app`).
 
 6. **Optionally commit and push** the mockup to the repo for project history. This is separate from the Vercel deploy and follows the same branch/PR/merge flow as GitHub Pages. Only do this if the user asks.
+
+## Security
+
+### Public visibility
+
+Both GitHub Pages and Vercel deploy content to **publicly accessible URLs** by default. Before deploying, confirm the mockup does not contain:
+
+- Real user data, PII, or production database content
+- API keys, tokens, secrets, or credentials
+- Internal-only URLs, hostnames, or infrastructure details
+- Proprietary business logic or unreleased feature specifics that should stay confidential
+
+### Content guidelines
+
+- Use **synthetic, fictional data** in all mockups (fake usernames, placeholder repos, made-up org names)
+- Do not embed real screenshots of internal tools unless cleared for public sharing
+- Do not reference external CDNs, scripts, or stylesheets. All assets must be inline. This prevents supply-chain risks and ensures the file works offline.
+
+### Credential hygiene
+
+- The skill uses `gh` CLI and `vercel` CLI, which rely on locally stored auth tokens. These tokens are never written into mockup files.
+- Do not hardcode tokens, passwords, or auth headers in any HTML, CSS, or JS within the mockup.
 
 ## Guidelines
 
