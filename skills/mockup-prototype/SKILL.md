@@ -20,7 +20,7 @@ End-to-end workflow for creating, iterating, and sharing interactive HTML mockup
 
 Before creating the file, ask the user which repo to work in. The mockup file lives in the repo's local clone from the start - no copying later.
 
-1. Ask: "Which repo should this mockup live in?" (e.g., `github/triage-agent`, `labudis/ideas`)
+1. Ask: "Which repo should this mockup live in?" (e.g., `acme/feature-explorer`, `contoso/design-lab`)
 2. Find the local clone (check `~/GitHub/<org>/<repo>` or `~/GitHub/<repo>`)
 3. Look for existing folder conventions: `docs/mockups/`, `considerations/`, `designs/`, `proposals/`. If none exist, use `docs/mockups/`.
 4. Create the mockup at `<repo>/docs/mockups/<feature-name>/mockup.html`
@@ -220,4 +220,4 @@ Both GitHub Pages and Vercel deploy content to **publicly accessible URLs** by d
 - Do not push changes during iteration. Local only until the user says to deploy.
 - Always auto-open the local file in browser during iteration.
 - Always auto-open the live Pages URL after deploy.
-- Use descriptive file and folder names (e.g., `sessions-sidebar`, not `mockup-1`).
+- Use descriptive file and folder names (e.g., `user-profile-card`, not `mockup-1`).
